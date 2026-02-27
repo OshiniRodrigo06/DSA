@@ -1,47 +1,46 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
 package VISubmission;
 
-/**
- *
- * @author user
- */
 public class OptimizedQuickSort {
 
     static int partition(int[] arr, int low, int high) {
-        int mid = (low + high) / 2;
-        int pivot = arr[mid];
+        int pivot = arr[low];        // pivot is on the LEFT
+        int x = low + 1;             // x starts just after pivot (moves right)
+        int y = high;                // y starts at the end (moves left)
 
-        // Move pivot to end
-        int temp = arr[mid];
-        arr[mid] = arr[high];
-        arr[high] = temp;
-
-        int i = low - 1;
-
-        for (int j = low; j < high; j++) {
-            if (arr[j] < pivot) {
-                i++;
-                temp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = temp;
+        while (true) {
+            // x moves right while values are less than pivot
+            while (x <= y && arr[x] < pivot) {
+                x++;
             }
+            // y moves left while values are greater than pivot
+            while (y >= x && arr[y] > pivot) {
+                y--;
+            }
+            // if pointers crossed, stop
+            if (x >= y) break;
+
+            // swap unsatisfying values at x and y
+            int temp = arr[x];
+            arr[x] = arr[y];
+            arr[y] = temp;
+
+            x++;
+            y--;
         }
 
-        temp = arr[i + 1];
-        arr[i + 1] = arr[high];
-        arr[high] = temp;
+        // place pivot in correct position (swap pivot with y)
+        int temp = arr[low];
+        arr[low] = arr[y];
+        arr[y] = temp;
 
-        return i + 1;
+        return y;   // return pivot's final position
     }
 
     static void quickSort(int[] arr, int low, int high) {
         if (low < high) {
             int pi = partition(arr, low, high);
-            quickSort(arr, low, pi - 1);
-            quickSort(arr, pi + 1, high);
+            quickSort(arr, low, pi - 1);   // left of pivot
+            quickSort(arr, pi + 1, high);  // right of pivot
         }
     }
 
@@ -50,11 +49,69 @@ public class OptimizedQuickSort {
             System.out.print(n + " ");
         System.out.println();
     }
-    
+
     public static void main(String[] args) {
-        int[] arr = {7, 2, 1, 6, 8, 5, 3, 4};
+        int[] arr = {11, 2, 9, 13, 57, 25, 17, 1, 90, 3};  // same as your diagram!
         quickSort(arr, 0, arr.length - 1);
         display(arr);
     }
-    
 }
+```
+
+---
+
+## Step-by-Step Trace Matching Your Diagram
+
+**Array: `{11, 2, 9, 13, 57, 25, 17, 1, 90, 3}`**
+```
+pivot = arr[0] = 11
+x = 1 (starts after pivot)
+y = 9 (starts at end)
+
+p        x                             y
+11 | 2   9   13  57  25  17  1   90   3
+```
+```
+x moves right → stops at arr[3]=13  (13 > 11, unsatisfying)
+y moves left  → stops at arr[9]=3   (3  < 11, unsatisfying)
+
+p        x                        y
+11 | 2   9  [13] 57  25  17  1   90  [3]
+              ↑                    ↑
+           SWAP x and y
+
+→ {11, 2, 9, 3, 57, 25, 17, 1, 90, 13}
+```
+```
+x moves right → stops at arr[4]=57  (57 > 11, unsatisfying)
+y moves left  → stops at arr[7]=1   (1  < 11, unsatisfying)
+
+p              x                 y
+11 | 2  9  3  [57] 25  17  [1]  90  13
+               ↑              ↑
+            SWAP x and y
+
+→ {11, 2, 9, 3, 1, 25, 17, 57, 90, 13}
+```
+```
+x moves right → stops at arr[5]=25  (25 > 11, unsatisfying)
+y moves left  → stops at arr[4]=1   (1  < 11, unsatisfying)
+
+x >= y → STOP (pointers crossed!)
+
+p              y  x
+11 | 2  9  3  [1][25] 17  57  90  13
+```
+```
+Swap pivot with arr[y]:
+swap arr[0] with arr[4]
+
+→ {1, 2, 9, 3, [11], 25, 17, 57, 90, 13}
+                  ↑
+          pivot=11 in correct position (index 4)
+```
+```
+Left of pivot:  {1, 2, 9, 3}   → recurse
+Right of pivot: {25, 17, 57, 90, 13} → recurse
+
+Final: {1, 2, 3, 9, 11, 13, 17, 25, 57, 90} ✓
